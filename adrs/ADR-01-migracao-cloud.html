@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="color-scheme" content="light">
+<title>ADR-01 — Migração Cloud FoodFlow</title>
+<style>
+  :root { color-scheme: light; }
+  @page { size: A4; margin: 1.8cm 2cm; background: white; }
+  * { box-sizing: border-box; }
+  html, body { background: #ffffff !important; }
+  body {
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    font-size: 11pt;
+    line-height: 1.55;
+    color: #1f2937;
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0;
+  }
+  h1 {
+    font-size: 20pt;
+    color: #0f172a;
+    border-bottom: 3px solid #2563eb;
+    padding-bottom: .35em;
+    margin: 0 0 .2em;
+    line-height: 1.25;
+  }
+  .subtitle { color: #64748b; font-size: 11pt; margin-bottom: 1.4em; }
+  h2 {
+    font-size: 13.5pt;
+    color: #1e40af;
+    margin: 1.6em 0 .5em;
+    padding-left: .55em;
+    border-left: 4px solid #2563eb;
+    page-break-after: avoid;
+  }
+  h3 {
+    font-size: 11.5pt;
+    color: #0f172a;
+    margin: 1.1em 0 .35em;
+    page-break-after: avoid;
+  }
+  p { margin: .45em 0; text-align: justify; }
+  ul, ol { padding-left: 1.4em; margin: .4em 0; }
+  li { margin: .25em 0; }
+  strong { color: #0f172a; }
+  code {
+    background: #f1f5f9;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: .88em;
+    font-family: "Consolas", "Courier New", monospace;
+  }
+
+  .meta {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: .9em 1.2em;
+    margin: 0 0 1.5em;
+    font-size: 10pt;
+  }
+  .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .35em 1.5em; }
+  .meta-item strong { color: #1e40af; }
+
+  .decision-box {
+    background: linear-gradient(90deg, #dbeafe 0%, #eff6ff 100%);
+    border-left: 5px solid #2563eb;
+    padding: 1em 1.2em;
+    margin: .8em 0 1em;
+    border-radius: 4px;
+  }
+  .decision-box strong.label {
+    display: block;
+    color: #1e40af;
+    font-size: 9.5pt;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    margin-bottom: .3em;
+  }
+  .decision-box .text { font-size: 12pt; color: #0f172a; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: .8em 0 1.2em;
+    font-size: 10pt;
+  }
+  th, td {
+    border: 1px solid #cbd5e1;
+    padding: .55em .7em;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: #1e40af;
+    color: white;
+    font-weight: 600;
+  }
+  tbody tr:nth-child(even) { background: #f8fafc; }
+  .pick { background: #dcfce7 !important; }
+  .pick td:first-child { font-weight: 700; color: #166534; }
+
+  .pros-cons { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; margin: .6em 0; }
+  .pros, .cons {
+    padding: .8em 1em .8em 1em;
+    border-radius: 6px;
+    font-size: 10.5pt;
+  }
+  .pros { background: #f0fdf4; border-left: 4px solid #16a34a; }
+  .cons { background: #fef2f2; border-left: 4px solid #dc2626; }
+  .pros h4, .cons h4 {
+    margin: 0 0 .4em;
+    font-size: 10.5pt;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+  }
+  .pros h4 { color: #166534; }
+  .cons h4 { color: #991b1b; }
+  .pros ul, .cons ul { padding-left: 1.1em; margin: 0; }
+
+  .callout {
+    background: #fffbeb;
+    border-left: 4px solid #f59e0b;
+    padding: .8em 1em;
+    border-radius: 4px;
+    margin: .8em 0;
+    font-size: 10.5pt;
+  }
+  .callout strong { color: #92400e; }
+
+  .timeline { list-style: none; padding-left: 0; }
+  .timeline li {
+    padding: .5em .8em .5em 2.5em;
+    margin: .4em 0;
+    background: #f8fafc;
+    border-left: 3px solid #2563eb;
+    border-radius: 3px;
+    position: relative;
+  }
+  .timeline li::before {
+    content: attr(data-week);
+    position: absolute;
+    left: .6em;
+    top: .5em;
+    background: #2563eb;
+    color: white;
+    font-size: 9pt;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+  .timeline li .txt { display: block; margin-left: 1.5em; }
+
+  hr { border: none; border-top: 1px solid #e2e8f0; margin: 1.4em 0; }
+  @media print {
+    body { margin: 0; }
+    .pros-cons { page-break-inside: avoid; }
+    table { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<h1>ADR-01 — Estratégia de Migração Cloud da FoodFlow</h1>
+<div class="subtitle">Architecture Decision Record · Ciclo 3: Cloud e Resiliência</div>
+
+<div class="meta">
+  <div class="meta-grid">
+    <div class="meta-item"><strong>Projeto:</strong> FoodFlow — Delivery</div>
+    <div class="meta-item"><strong>Status:</strong> Proposto</div>
+    <div class="meta-item"><strong>Autor:</strong> Gabriel Carvalho — 23201412</div>
+    <div class="meta-item"><strong>Data:</strong> 22/05/2026</div>
+    <div class="meta-item"><strong>Disciplina:</strong> Arquitetura de Software</div>
+    <div class="meta-item"><strong>Professor:</strong> Carlos</div>
+    <div class="meta-item" style="grid-column: 1 / -1;"><strong>Repositório:</strong> <a href="https://github.com/GabrielGFC/foodflow-adr" style="color:#1e40af; text-decoration:none;">github.com/GabrielGFC/foodflow-adr</a></div>
+  </div>
+</div>
+
+<h2>1. Decisão</h2>
+<div class="decision-box">
+  <strong class="label">Decisão arquitetural</strong>
+  <div class="text">Adotar a <strong>Opção A — PaaS Gerenciado</strong>: migrar a aplicação Django para <strong>Railway</strong> e o PostgreSQL para <strong>Supabase</strong>.</div>
+</div>
+
+<h2>2. Contexto</h2>
+<p>A FoodFlow opera hoje como monolito Python/Django em um VPS único (IaaS manual), com PostgreSQL no mesmo servidor e deploy via SSH. O sistema atingiu o limite operacional:</p>
+<ul>
+  <li><strong>Saturação:</strong> 80% de CPU nos picos de fim de semana — pedidos atrasando.</li>
+  <li><strong>Downtime de deploy:</strong> 30 min/semana, incompatível com SLA &gt;99% (orçamento de 7h12min/mês; um único deploy consome ~7%).</li>
+  <li><strong>Budget rígido:</strong> R$ 2.000/mês de infra.</li>
+  <li><strong>Time enxuto:</strong> 4 devs, 1 DBA, 1 ops part-time — sem expertise em K8s ou IaC avançada.</li>
+  <li><strong>Janela curta:</strong> a solução precisa entregar valor em semanas, não meses.</li>
+</ul>
+
+<h3>Comparação das opções</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Critério</th>
+      <th>A — PaaS</th>
+      <th>B — IaaS + Docker</th>
+      <th>C — K8s (EKS)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="pick">
+      <td>Custo/mês</td>
+      <td>~R$ 800 ✓</td>
+      <td>~R$ 1.500</td>
+      <td>~R$ 3.500 ✗</td>
+    </tr>
+    <tr>
+      <td>Setup</td>
+      <td>1 semana</td>
+      <td>3 semanas</td>
+      <td>2 meses</td>
+    </tr>
+    <tr>
+      <td>Controle infra</td>
+      <td>Baixo</td>
+      <td>Médio</td>
+      <td>Total</td>
+    </tr>
+    <tr>
+      <td>Auto-scaling</td>
+      <td>Automático (até 10×)</td>
+      <td>Manual (script)</td>
+      <td>Automático granular</td>
+    </tr>
+    <tr>
+      <td>Expertise necessária</td>
+      <td>Baixa</td>
+      <td>Média</td>
+      <td>Alta (não temos)</td>
+    </tr>
+    <tr>
+      <td>Encaixa no budget?</td>
+      <td><strong>Sim</strong></td>
+      <td>Sim</td>
+      <td><strong>Não</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Restrições que pesaram mais</h3>
+<ol>
+  <li><strong>Orçamento (R$ 2k/mês)</strong> — elimina diretamente a Opção C (+75% acima do teto).</li>
+  <li><strong>Expertise disponível</strong> — o time não opera K8s/EKS em produção; assumir essa complexidade aumentaria o risco em vez de reduzir.</li>
+  <li><strong>SLA + janela de entrega</strong> — precisamos reduzir o downtime <em>agora</em>, não em 2 meses.</li>
+</ol>
+
+<h2>3. Justificativa com Trade-off</h2>
+
+<div class="pros-cons">
+  <div class="pros">
+    <h4>✓ O que ganhamos</h4>
+    <ul>
+      <li><strong>Custo abaixo do teto:</strong> R$ 1.200 de folga mensal para APM e tráfego.</li>
+      <li><strong>Time-to-value:</strong> 1 semana vs. 3 semanas (B) ou 2 meses (C).</li>
+      <li><strong>Auto-scaling</strong> até 10 instâncias — resolve o pico do fim de semana.</li>
+      <li><strong>Deploy zero-downtime</strong> nativo — elimina 30 min/semana.</li>
+      <li><strong>PostgreSQL gerenciado:</strong> backup, replicação e patching automáticos.</li>
+      <li><strong>Carga operacional baixa:</strong> ops part-time sustenta sem virar gargalo.</li>
+    </ul>
+  </div>
+  <div class="cons">
+    <h4>✗ O que abrimos mão</h4>
+    <ul>
+      <li><strong>Controle fino de infra:</strong> sem tuning de SO, kernel ou networking.</li>
+      <li><strong>Lock-in:</strong> acoplamento operacional a Railway + Supabase.</li>
+      <li><strong>Granularidade de escala:</strong> escala a aplicação inteira, não por módulo.</li>
+      <li><strong>Custo unitário em escala alta:</strong> PaaS encarece se o volume crescer muito.</li>
+    </ul>
+  </div>
+</div>
+
+<h3>Por que o trade-off vale a pena neste contexto</h3>
+<p>O trade-off central é <strong>controle × velocidade de entrega + carga operacional</strong>. A FoodFlow hoje <em>não tem</em> problema de controle fino — tem problema de <strong>saturação, downtime e time pequeno</strong>. Pagar com "menos controle" para resolver os três em uma semana, dentro do orçamento, é uma troca racional. O lock-in só se torna doloroso em escala muito maior que a atual; até lá, a empresa terá receita e time para reavaliar.</p>
+
+<div class="callout">
+  <strong>⚠ Anti-migué:</strong> K8s (C) é tecnicamente superior em controle e granularidade, mas está <strong>fora do budget</strong> e <strong>acima da capacidade operacional do time</strong>. "Mais moderno" não é justificativa — é custo sem retorno proporcional neste estágio. Docker puro (B) paga 87% a mais que PaaS, ainda exige scripts manuais de auto-scaling e mantém o ops como gargalo: não resolve o problema central.
+</div>
+
+<h2>4. Consequências</h2>
+
+<h3>Próximos 30 dias</h3>
+<ol class="timeline">
+  <li data-week="S1"><span class="txt">Provisionar Railway + Supabase; configurar variáveis e secrets; validar deploy de staging.</span></li>
+  <li data-week="S2"><span class="txt">Migrar dados do PostgreSQL on-premise para Supabase (dump + restore + validação); ensaiar rollback.</span></li>
+  <li data-week="S3"><span class="txt">Cutover em janela de baixo tráfego (madrugada de terça); manter VPS antigo em standby por 7 dias.</span></li>
+  <li data-week="S4"><span class="txt">Desligar VPS antigo; instrumentar métricas (latência, erro, throughput) e configurar alertas no Sentry.</span></li>
+</ol>
+
+<h3>Decisões que essa escolha vai forçar no futuro</h3>
+<ul>
+  <li><strong>Observabilidade:</strong> PaaS oculta a infra — precisaremos escolher uma stack de APM (Sentry / Datadog / New Relic). Não dá mais para <code>tail -f</code> no servidor.</li>
+  <li><strong>Saída do monolito:</strong> quando o auto-scaling do Railway começar a ficar caro (estimativa: &gt;3× o tráfego atual), seremos forçados a decidir entre extrair módulos críticos para Serverless/Functions ou migrar para K8s com o time já maior.</li>
+  <li><strong>Compliance:</strong> se passarmos a processar pagamentos (PCI-DSS) ou crescer cross-border (LGPD/GDPR), será necessário reavaliar se Supabase atende aos requisitos regulatórios.</li>
+  <li><strong>Disaster Recovery:</strong> documentar como restaurar um backup do Supabase em outro provedor — mitigação parcial do lock-in.</li>
+</ul>
+
+<h2>5. Referências</h2>
+<ul>
+  <li>Aulas de Arquitetura — modelos de serviço (IaaS, PaaS, SaaS, FaaS) e trade-offs cloud.</li>
+  <li>Hooker — princípios de decisão arquitetural (contexto sobre tecnologia).</li>
+  <li>Caso FoodFlow — Ciclo 1 e enunciado do Ciclo 3.</li>
+</ul>
+
+</body>
+</html>
